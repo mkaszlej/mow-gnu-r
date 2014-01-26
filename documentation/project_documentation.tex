@@ -1,0 +1,202 @@
+\documentclass[a4 14pt]{report}
+
+\usepackage{color}
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{todonotes}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{
+  body={6.5in, 8.5in},
+  left=0.7in,
+  top=0.45in,
+  bottom=0.3in
+}
+
+\title{Metody odkrywania wiedzy\\Dokumentacja projektowa}
+\author{Model danych:\\Dane dotyczące głosowań sejmowych ze strony Smarter Poland\\[2cm]Michał Kaszlej\\Paweł Maj}
+\date{Listopad 22, 2013}
+
+\begin{document}
+
+\begin{titlepage}
+
+\maketitle
+
+\end{titlepage}
+
+	\section{Temat projektu}
+		
+		\begin{itemize}
+			\item{Projekt analityczny}
+			\item{Zadanie klasyfikacji}
+			\item{Model danych}\\
+				\href{http://tofesi.mimuw.edu.pl/~cogito/smarterpoland/GlosowaniaPoslow/}{Dane dotyczące głosowań sejmowych ze strony Smarter Poland} (dostęp dnia 22.11.2013).
+		\end{itemize}
+		
+
+	\section{Interpretacja tematu projektu}
+
+		\subsection{Opis zbioru danych}
+			Zbiór danych obejmuje głosowania i skład VI kadencji Sejmu RP (2007-2011).
+			Dane zorganizowane są w następujących plikach:
+			\begin{itemize}
+				\item{\ttfamily{glosowania.txt}}\\
+					Plik zawiera wyniki glosowań poszczególnych posłów. Wiersze to nazwiska posłów, kolumny to identyfikatory głosowań.
+				\item{\ttfamily{glosowania\_metadata.txt}}\\
+					Plik zawiera metadane głosowań indeksowane identyfikatorem głosowania.
+					W szczególności sprecyzowana jest data głosownia, temat głosowania, podsumowanie złożonych głosów. 
+					Dodatkowo określone zostało czy podczas głosowania posłów danej partii obowiązywała dyscyplina.
+				\item{\ttfamily{poslowie\_metadata.txt}}\\
+					Plik zawiera informacje na temat posłów. W szczególności ostatnią przynależność do partii, pierwsze i ostatnie głosowanie oraz podsumowanie absencji danego posła.
+				\item{\ttfamily{party\_affiliations.txt}}\\
+					Plik zawiera informacje na temat przynależności partynej posła w danym głosowaniu.
+			\end{itemize}
+			
+			Dane pochodzą z systemu orka.sejm.gov.pl, zostały udostępnione jako mechanizm kontroli społeczeństwa nad najwyższym organem władzy ustawodawczej Rzeczypospolitej Polskiej.
+
+		\subsection{Wybór podstawowego atrybutu reprezentującego pojęcie docelowe}
+
+			W przypadku wybranego przez nas zbioru danych, wybór podstawowego atrybutu nasuwa się samoczynnie - jest nim wynik głosowania. Jest to atrybut dyskretny, przyjmuje w zbiorze danych następujące wartości:
+			
+			\renewcommand{\arraystretch}{1.2}
+			\begin{center}
+				\begin{tabular}{c|c}
+    					Wartość atrybutu & Interpretacja \\ \hline
+					1 & Głos "za" \\ 
+    					-1 & Głos "przeciw" \\
+    					NA & Brak głosu \\
+ 				\end{tabular}
+			\end{center}
+
+			Dodatkowo wartość "NA" atrybutu zostanie zastąpiona wartością 0. Przekształcenie to ma pozwolić na reprezentację atrybutu jako liczby całkowitej.	
+
+		\subsection{Dodatkowe atrybuty}
+			
+			Jako dodatkowe atrybuty można wyróżnić:
+
+			\begin{itemize}
+				\item{Przynależność do partii politycznej}\\
+					W VI kadencji Sejmu RP, atrybut przyjmuje następujące wartości:
+					\begin{center}
+					\begin{tabular}{c|c}
+    						Wartość atrybutu & Liczba wystąpień w \texttt{party\_affiliations.txt} \\ \hline
+						PO & 1736535 \\
+						PiS & 1286816 \\
+						NA & 509520 \\
+						PSL &  259772 \\
+						Lewica & 217725 \\
+						SLD & 125318 \\
+						niez. & 79997 \\
+						PJN &  43630 \\
+						LiD & 22960 \\
+						SDPL-NL &  21657 \\
+						SDPL & 16803 \\
+						Polska\_XXI &  14278 \\
+						Polska\_Plus &  12816 \\
+						DKP\_SD & 12066 \\
+						DKP & 9147 \\
+ 					\end{tabular}
+					\end{center}				
+				\item{Dysycyplina partyjna}\\
+					Plik \texttt{glosowania\_metadata.txt} dla każdego głosowania zawiera informację, którę partie polityczne stosowały dyscyplinę partyjną w danym głosowaniu. Atrybut zapisany jest w postaci nazw partii politycznych oddzielonych przeciniem. Prawdopodobnie wymagane będzie przetworzenie atrybutu do prostszej postaci.
+				\item{Temat głosowania}\\
+					Plik \texttt{glosowania\_metadata.txt} zawiera pola \texttt{nazwa1} i \texttt{nazwa2} zawierające informacje o temacie głosowania. 
+					Możliwe jest sformułowanie takiego zbioru słów i sformułowań kluczowych, jednozacznie wyróżniających interesujące nas tematy głosowań. Przykładowy zbiór takich sformułowań zaprezentowaliśmy poniżej:
+					\begin{center}
+					\begin{tabular}{c|c}
+						Wartość atrybutu & liczba wystąpień w \texttt{glosowania\_metadata.txt} \\
+						"budżetowej na rok 2008" & 214 \\
+						"budżetowej na rok 2009" & 403 \\
+						"budżetowej na rok 2010" & 129 \\  
+						"budżetowej na rok 2011" & 141
+					\end{tabular}
+					\end{center}	
+				
+					Zwrócić należy szczególną uwagę na słowa kluczowe typu "przyjęcie", "odrzucenie" itp.
+					Fakt występowania tych słów w temacie może zmieniać wartość logiczną głosowania.
+			\end{itemize}
+
+
+	\section{Opis algorytmów, które zostaną wykorzystane}
+
+		Trudno w tej chwili przedstawić dokładną listę algorytmów z których zamierzamy skorzystać.
+
+		Chcielibyśmy oprzeć projekt na algorytmie drzew decyzyjnych, jednak ze względu na zastosowanie dodatkowych atrybutów prawdopodobnie niezbędne okaże się skorzystanie dodatkowych metod przetwarzania danych.
+
+		Szczególną rolę będzie dla nas miało przetwarzanie tematów głosowań. Pozwoli to powiązać dane statystyczne z rzeczywistymi, nurtującymi nas w życiu codziennym problemami. 
+		Takie przetwarzanie wymagało będzie zdefinowania zbioru interesujących nas słów kluczowych i sformułowań.
+		Dodatkowym problemem będzie też wyznaczanie wartości logiczej głosowań ( można głosować za przyjęciem bądź za odrzuceniem ). Sposób wyznaczania tego zbioru zdefiniowany zostanie w finalnej wersji dokumentacji.
+	
+
+	\section{Plan eksperymentów}
+
+		\subsection{Plan projektu}
+			
+			Z opisu projektu nie wynika czy przeprowadzić mamy jedną czy wiele klasyfikacji. 
+			Postanowiliśmy więc zdefiniować szereg eksperymentów, z których każdy zakończy się przyporządkowaniem każdego posła do jakiejś klasy.
+
+			Na wypadek gdyby wielokrotna klasyfikacja nie była punktowana postanowiliśmy także wyróżnić jeden eksperyment jako podstawowy. 
+
+			Eksperymenty dodaktowe zostaną zrealizowane w drugiej kolejności, po zrealizowaniu eksperymentu podstawowego.
+		
+		\subsection{Eksperyment podstawowy}
+
+			Naszą propozycją na eksperyment podstawowy, jest klasyfikacja posłów do partii politycznych. 
+			
+			Zastosowane przez nas podejście różni się tym od przypisania obecnego w danych, że klasyfikacja ta nie będzie zależna od wyboru posłów, lecz od wyników ich głosowań.
+			Porównywać będziemy to, jak głosował w danych głosowaniach poseł - z tym jak głosowały partie polityczne. Pomijane będą dyscypliny partyjne dla tych posłów, których obowiązują.
+			
+			Dodatkowe komplikacje wynikają z faktu, że część partii ulega rozwiązaniu w trakcie kadencji oraz to, że powstają nowe partie i koła poselskie.
+
+			W wyniku tej klasyfikacji posłowie zostaną przydzieleni do partii politycznych najbardziej zbieżnych z ich wynikami ich głosowań.
+			
+		\subsection{Eksperymenty dodatkowe}
+			
+			O ile uda się przeprowadzić eksperyment podstawowy, w następnej kolejności przeprowadzone zostaną poniższe eksperymenty:
+
+			\begin{enumerate}
+
+				\item{Klasyfikacja posłów na podstawie tematów głosowań}
+				
+					\begin{itemize}
+						\item Przygotowanie zbioru sformułowań kluczowych\\
+							Przygotowanie zbioru polegać będzie na określeniu sformułować opisujących wybrane ważne głosowania VI kadencji Sejmu RP. Sformułowania dobrane muszą zostać w taki sposób, aby jednoznacznie określały zbiór głosowań związanych z danym zaganieniem.
+
+						\item Zdefiniowanie kategorii\\
+							Przygotowane zostaną zależności między wartościami głosów w tematach kluczowych a kategoriami do których przydzieleni zostaną posłowie.
+						\item Stworzenie drzewa decyzyjnego\\
+							Stworzone zostanie drzewo decyzyjne dla ustalonych reguł.
+					\end{itemize}
+
+
+				\item{Głosy posła kontra głosy jego partii. Czy dany poseł głosuje zgodnie z linią swojej partii politycznej?}\\
+					\begin{itemize}
+						\item Porównianie głosowań posła do średniej głosowań jego partii. Jak zbieżne są głosy danego posła z głosami innych posłów jego partii?
+						\item Przedstawienie 'lojalności' posłów, średniej lojalności poszczególnych partii.
+						\item Wykrywanie przypadków dyscypliny partyjnej. Takie przypadki, nie uwzględniane, uwzględniane z mniejszą wagą.
+						\item Wykrywanie przypadków złamania dyscypliny partyjnej.
+					\end{itemize}
+				\item{Analiza głosów typu "wstrzymuję się"}
+					\begin{itemize}
+						\item Sformułowanie zbioru sformułowań kluczowych, odpowiadającego trudnym głosowaniom VI kadencji Sejmu RP.
+						\item Eliminacja głosowań z dyscypliną partyjną.
+						\item Zaklasyfikowanie tematów jako tych z wysoką liczbą głosów wstrzymuję się oraz pozostałych.
+					\end{itemize}
+			\end{enumerate}
+
+	\section{Otwarte kwestie wymagające późniejszego rozwiązania (wraz z wyjaśnieniem powodów, dla których ich rozwiązanie jest odłożone na później)}
+	
+		\begin{itemize}
+			\item{Sprecyzowanie szczegółów dotyczących zastosowanych algorytmów}\\
+				Tak jak zostało napisane wcześniej, projekt pragniemy zrealizować korzystając z algorytmu drzew decyzyjnych. 
+				W przypadku eksperymentu podstawowego mamy jednak do czynienia z zależnością od wielu atrybutów. Nalezy wziąć pod uwagę dyscypliny partyjne, oraz pojawianie się i znikanie partii politycznych.
+				
+				Występowanie dodatkowych atrybutów, znacznie komplikuję zastosowanie drzewa decyzyjnego, dlatego też dokładniejszy opis algorytmu przedstawiony zostnie razem z realizacją.
+
+			\item{Kryteria oceny modeli}\\
+				 Kryteria oceny modeli zależne będą od szczegółów algorytmu i zostaną sprecyzowane wraz z nimi. 
+		\end{itemize}	
+\end{document}	
